@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Health Statistics</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/script.js"></script>
+    <link rel="stylesheet" href="/styles/style.css" />
+  </head>
+
+  <body>
+    <h2>1. Age-Standardized Death Rates by Region</h2>
+    <label for="regionSelect">Select Region:</label>
+    <select id="regionSelect">
+      <option value="" disabled selected>Select a region</option>
+      <% regions.forEach(region=> { %>
+      <option value="<%= region.RegionName %>"><%= region.RegionName %></option>
+      <% }); %>
+    </select>
+    <button id="showDataBtn">Show Data</button>
+    <canvas id="deathRateChart" width="400" height="200"></canvas>
+  </body>
+</html>
