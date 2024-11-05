@@ -16,7 +16,7 @@ const db = mysql.createPool({
   host: "localhost",
   database: "WHO",
   user: "root",
-  password: "0327",
+  password: "",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -24,160 +24,14 @@ const db = mysql.createPool({
 
 app.get("/", async (req, res) => {
   try {
-    const regions = [
-      "Europe",
-      "North America and the Caribbean",
-      "Central and South America",
-      "Asia",
-      "Oceania",
-      "Africa",
-    ];
-    const countries = [
-      "Albania",
-      "Antigua and Barbuda",
-      "Argentina",
-      "Armenia",
-      "Australia",
-      "Austria",
-      "Azerbaijan",
-      "Bahamas",
-      "Bahrain",
-      "Barbados",
-      "Belarus",
-      "Belgium",
-      "Belize",
-      "Bosnia and Herzegovina",
-      "Brazil",
-      "Brunei Darussalam",
-      "Bulgaria",
-      "Cabo Verde",
-      "Canada",
-      "Chile",
-      "Colombia",
-      "Costa Rica",
-      "Croatia",
-      "Cuba",
-      "Cyprus",
-      "Czechia",
-      "Denmark",
-      "Dominica",
-      "Dominican Republic",
-      "Ecuador",
-      "Egypt",
-      "El Salvador",
-      "Estonia",
-      "Fiji",
-      "Finland",
-      "France",
-      "French Guiana",
-      "Georgia",
-      "Germany",
-      "Greece",
-      "Grenada",
-      "Guadeloupe",
-      "Guatemala",
-      "Guyana",
-      "China, Hong Kong SAR",
-      "Hungary",
-      "Iceland",
-      "Iran (Islamic Republic of)",
-      "Iraq",
-      "Ireland",
-      "Israel",
-      "Italy",
-      "Jamaica",
-      "Japan",
-      "Kazakhstan",
-      "Republic of Korea",
-      "Kuwait",
-      "Kyrgyzstan",
-      "Latvia",
-      "Lithuania",
-      "Luxembourg",
-      "Maldives",
-      "Malta",
-      "Martinique",
-      "Mauritius",
-      "Mayotte",
-      "Mexico",
-      "Republic of Moldova",
-      "Mongolia",
-      "Montenegro",
-      "Netherlands",
-      "New Zealand",
-      "Nicaragua",
-      "North Macedonia",
-      "Norway",
-      "Panama",
-      "Paraguay",
-      "Peru",
-      "Philippines",
-      "Poland",
-      "Portugal",
-      "Puerto Rico",
-      "R?union",
-      "Romania",
-      "Russian Federation",
-      "Saint Kitts and Nevis",
-      "Saint Lucia",
-      "Saint Vincent and the Grenadines",
-      "Sao Tome and Principe",
-      "Serbia",
-      "Seychelles",
-      "Singapore",
-      "Slovakia",
-      "Slovenia",
-      "South Africa",
-      "Spain",
-      "Sri Lanka",
-      "Suriname",
-      "Sweden",
-      "Switzerland",
-      "Syrian Arab Republic",
-      "Tajikistan",
-      "Thailand",
-      "Trinidad and Tobago",
-      "T?rkiye",
-      "Turkmenistan",
-      "Ukraine",
-      "United Kingdom of Great Britain and Northern Ireland",
-      "United States of America",
-      "Uruguay",
-      "Uzbekistan",
-      "Venezuela (Bolivarian Republic of)",
-      "Jordan",
-      "United Arab Emirates",
-      "Lebanon",
-      "Malaysia",
-      "Oman",
-      "Qatar",
-      "Saudi Arabia",
-    ];
-    const ageGroups = [
-      "[85+]",
-      "[80-84]",
-      "[75-79]",
-      "[70-74]",
-      "[65-69]",
-      "[60-64]",
-      "[55-59]",
-      "[50-54]",
-      "[45-49]",
-      "[40-44]",
-      "[35-39]",
-      "[30-34]",
-      "[25-29]",
-      "[20-24]",
-      "[15-19]",
-      "[10-14]",
-      "[5-9]",
-      "[1-4]",
-      "[0]",
-      "[All]",
-      "[Unknown]",
-    ];
-    const sexOptions = ["All", "Male", "Female", "Unknown"];
-
+    const [regions] = await db.query("SELECT DISTINCT RegionName FROM Regions");
+    const [countries] = await db.query(
+      "SELECT DISTINCT CountryName FROM Countries"
+    );
+    const [ageGroups] = await db.query(
+      "SELECT DISTINCT AgeGroup FROM AgeGroups"
+    );
+    const [sexOptions] = await db.query("SELECT DISTINCT Sex FROM Sex");
     res.render("home", { regions, countries, ageGroups, sexOptions });
     // res.render("chart");
   } catch (error) {
@@ -186,6 +40,7 @@ app.get("/", async (req, res) => {
   }
 });
 
+// question 1: mortality by age group by region
 app.get("/api/mortality-by-age-group-region", async (req, res) => {
   const selectedRegion = req.query.region;
   console.log(selectedRegion);
@@ -250,8 +105,51 @@ app.get("/api/mortality-by-age-group-region", async (req, res) => {
   }
 });
 
+// question 2: mortality by age group in high-data regions
+app.get("/api/mortality-by-age-group-high-data", async (req, res) => {
+  const { region, ageGroup } = req.query;
 
+  try {
+    // Fetch high-data regions based on total mortality counts
+    const highDataRegionsQuery = `
+            SELECT Regions.RegionName
+            FROM Regions
+            JOIN Countries ON Regions.RegionID = Countries.RegionID
+            JOIN HealthStatistics ON Countries.CountryID = HealthStatistics.CountryID
+            GROUP BY Regions.RegionName
+            HAVING SUM(HealthStatistics.Number) > ?;  -- Define your threshold value
+        `;
+    const [highDataRegions] = await db.execute(highDataRegionsQuery, [1000000]); // Example threshold
 
+    // If a region and age group are provided, fetch mortality data
+    if (region && ageGroup) {
+      const mortalityDataQuery = `
+                SELECT AgeGroups.AgeGroup, SUM(HealthStatistics.Number) AS TotalMortalityCount
+                FROM HealthStatistics
+                JOIN Countries ON HealthStatistics.CountryID = Countries.CountryID
+                JOIN Regions ON Countries.RegionID = Regions.RegionID
+                JOIN AgeGroups ON HealthStatistics.AgeGroupID = AgeGroups.AgeGroupID
+                WHERE Regions.RegionName = ? AND AgeGroups.AgeGroupCode BETWEEN ? AND ?
+                GROUP BY AgeGroups.AgeGroup;
+            `;
+
+      const [mortalityData] = await db.execute(mortalityDataQuery, [
+        region,
+        ageGroup.split("-")[0],
+        ageGroup.split("-")[1] || 85,
+      ]);
+      console.log(mortalityData);
+      return res.json({ highDataRegions, mortalityData });
+    }
+
+    // Return high data regions only if no specific region/age group selected
+    console.log(highDataRegions);
+    return res.json({ highDataRegions });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

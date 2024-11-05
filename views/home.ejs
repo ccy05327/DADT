@@ -1,25 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Health Statistics</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="/script.js"></script>
     <link rel="stylesheet" href="/styles/style.css" />
-  </head>
+</head>
 
-  <body>
-    <h2>1. Age-Standardized Death Rates by Region</h2>
-    <label for="regionSelect">Select Region:</label>
-    <select id="regionSelect">
-      <option value="" disabled selected>Select a region</option>
-      <% regions.forEach(region=> { %>
-      <option value="<%= region.RegionName %>"><%= region.RegionName %></option>
-      <% }); %>
-    </select>
-    <button id="showDataBtn">Show Data</button>
-    <canvas id="deathRateChart" width="400" height="200"></canvas>
-  </body>
+<body>
+    <h1>Health Statistics Analysis</h1>
+
+    <!-- Question 1: Age-Standardized Death Rates by Region -->
+    <section>
+        <h2>1. Age-Standardized Death Rates by Region</h2>
+        <label for="regionSelectQ1">Select Region:</label>
+        <select id="regionSelectQ1">
+            <option value="" disabled selected>Select a region</option>
+            <% regions.forEach(region=> { %>
+                <option value="<%= region.RegionName %>">
+                    <%= region.RegionName %>
+                </option>
+                <% }); %>
+        </select>
+        <button id="showDataBtnQ1">Show Data</button>
+        <canvas id="deathRateChartQ1" width="400" height="200"></canvas>
+    </section>
+
+    <!-- Question 2: Mortality by Age Group in High-Data Regions -->
+<h2>2. Mortality by Age Group in High-Data Regions</h2>
+<label for="regionSelectQ2">Select High-Data Region:</label>
+<select id="regionSelectQ2">
+    <option value="" disabled selected>Select a high-data region</option>
+    <% regions.forEach(region=> { %>
+        <option value="<%= region.RegionName %>">
+            <%= region.RegionName %>
+        </option>
+        <% }); %></select>
+<label for="ageGroupSelect">Select Age Group:</label>
+<select id="ageGroupSelect">
+    <option value="" disabled selected>Select an age group</option>
+    <option value="0-9">0-9</option>
+    <option value="10-19">10-19</option>
+    <option value="20-29">20-29</option>
+    <option value="30-39">30-39</option>
+    <option value="40-49">40-49</option>
+    <option value="50-59">50-59</option>
+    <option value="60-69">60-69</option>
+    <option value="70-79">70-79</option>
+    <option value="80+">80+</option>
+</select>
+    <button id="showDataBtnQ2">Show Data</button>
+    <canvas id="deathRateChartQ2" width="400" height="200"></canvas>
+    </section>
+
+    <script src="/scripts/scriptQ1.js"></script>
+    <script src="/scripts/scriptQ2.js"></script>
+    <!-- Add more script includes for additional questions as needed -->
+</body>
+
 </html>
