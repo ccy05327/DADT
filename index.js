@@ -106,7 +106,7 @@ app.get("/api/mortality-by-age-group-region", async (req, res) => {
 });
 
 // question 2: mortality by age group in regions (highlighted)
-app.get("/api/mortality-by-age-group-high-data", async (req, res) => {
+app.get("/api/mortality-by-age-group-in-regions", async (req, res) => {
   const { region, ageGroup } = req.query;
   console.log(region, ageGroup);
     // const query = `
@@ -180,6 +180,9 @@ app.get("/api/mortality-by-age-group-high-data", async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
+
+// question 3: gender differences in mortality by region
+app.get("/api/mortality-
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
       const response = await fetch(
-        `/api/mortality-by-age-group-high-data?region=${selectedRegion}&ageGroup=${selectedAgeGroup}`
+        `/api/mortality-by-age-group-in-regions?region=${selectedRegion}&ageGroup=${selectedAgeGroup}`
       );
       const data = await response.json();
 
