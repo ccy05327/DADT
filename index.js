@@ -105,50 +105,80 @@ app.get("/api/mortality-by-age-group-region", async (req, res) => {
   }
 });
 
-// question 2: mortality by age group in high-data regions
+// question 2: mortality by age group in regions (highlighted)
 app.get("/api/mortality-by-age-group-high-data", async (req, res) => {
   const { region, ageGroup } = req.query;
+  console.log(region, ageGroup);
+    // const query = `
+    //     SELECT 
+    //         CASE 
+    //             WHEN AgeGroups.AgeGroupCode < 10 THEN '0-9'
+    //             WHEN AgeGroups.AgeGroupCode < 20 THEN '10-19'
+    //             WHEN AgeGroups.AgeGroupCode < 30 THEN '20-29'
+    //             WHEN AgeGroups.AgeGroupCode < 40 THEN '30-39'
+    //             WHEN AgeGroups.AgeGroupCode < 50 THEN '40-49'
+    //             WHEN AgeGroups.AgeGroupCode < 60 THEN '50-59'
+    //             WHEN AgeGroups.AgeGroupCode < 70 THEN '60-69'
+    //             WHEN AgeGroups.AgeGroupCode < 80 THEN '70-79'
+    //             ELSE '80+'
+    //         END AS AgeGroup,
+    //         SUM(HealthStatistics.Number) AS TotalMortalityCount
+    //     FROM HealthStatistics
+    //     JOIN Countries ON HealthStatistics.CountryID = Countries.CountryID
+    //     JOIN Regions ON Countries.RegionID = Regions.RegionID
+    //     JOIN AgeGroups ON HealthStatistics.AgeGroupID = AgeGroups.AgeGroupID
+    //     WHERE Regions.RegionName = ? 
+    //         AND AgeGroups.AgeGroup NOT IN ('[All]', '[Unknown]')
+    //         AND ${ageRangeCondition}
+    //     GROUP BY AgeGroup
+    //     ORDER BY MIN(AgeGroups.AgeGroupCode)
+    // `;
 
-  try {
-    // Fetch high-data regions based on total mortality counts
-    const highDataRegionsQuery = `
-            SELECT Regions.RegionName
-            FROM Regions
-            JOIN Countries ON Regions.RegionID = Countries.RegionID
-            JOIN HealthStatistics ON Countries.CountryID = HealthStatistics.CountryID
-            GROUP BY Regions.RegionName
-            HAVING SUM(HealthStatistics.Number) > ?;  -- Define your threshold value
-        `;
-    const [highDataRegions] = await db.execute(highDataRegionsQuery, [1000000]); // Example threshold
+  const query = `
+    SELECT 
+        CASE 
+            WHEN ag.AgeGroupCode BETWEEN 0 AND 9 THEN '0-9'
+            WHEN ag.AgeGroupCode BETWEEN 10 AND 19 THEN '10-19'
+            WHEN ag.AgeGroupCode BETWEEN 20 AND 29 THEN '20-29'
+            WHEN ag.AgeGroupCode BETWEEN 30 AND 39 THEN '30-39'
+            WHEN ag.AgeGroupCode BETWEEN 40 AND 49 THEN '40-49'
+            WHEN ag.AgeGroupCode BETWEEN 50 AND 59 THEN '50-59'
+            WHEN ag.AgeGroupCode BETWEEN 60 AND 69 THEN '60-69'
+            WHEN ag.AgeGroupCode BETWEEN 70 AND 79 THEN '70-79'
+            ELSE '80+'
+        END AS AgeRange,
+        r.RegionName,
+        SUM(hs.Number) AS TotalMortality
+    FROM HealthStatistics hs
+    JOIN AgeGroups ag ON hs.AgeGroupID = ag.AgeGroupID
+    JOIN Countries c ON hs.CountryID = c.CountryID
+    JOIN Regions r ON c.RegionID = r.RegionID
+    WHERE ag.AgeGroup NOT IN ('[All]', '[Unknown]')
+    AND (
+      CASE 
+          WHEN ag.AgeGroupCode BETWEEN 0 AND 9 THEN '0-9'
+          WHEN ag.AgeGroupCode BETWEEN 10 AND 19 THEN '10-19'
+          WHEN ag.AgeGroupCode BETWEEN 20 AND 29 THEN '20-29'
+          WHEN ag.AgeGroupCode BETWEEN 30 AND 39 THEN '30-39'
+          WHEN ag.AgeGroupCode BETWEEN 40 AND 49 THEN '40-49'
+          WHEN ag.AgeGroupCode BETWEEN 50 AND 59 THEN '50-59'
+          WHEN ag.AgeGroupCode BETWEEN 60 AND 69 THEN '60-69'
+          WHEN ag.AgeGroupCode BETWEEN 70 AND 79 THEN '70-79'
+          ELSE '80+'
+      END = '${ageGroup}'
+  )  -- Replace '?' with user input for filtering
+    GROUP BY AgeRange, r.RegionName
+    ORDER BY AgeRange ASC, r.RegionName
+  `;
 
-    // If a region and age group are provided, fetch mortality data
-    if (region && ageGroup) {
-      const mortalityDataQuery = `
-                SELECT AgeGroups.AgeGroup, SUM(HealthStatistics.Number) AS TotalMortalityCount
-                FROM HealthStatistics
-                JOIN Countries ON HealthStatistics.CountryID = Countries.CountryID
-                JOIN Regions ON Countries.RegionID = Regions.RegionID
-                JOIN AgeGroups ON HealthStatistics.AgeGroupID = AgeGroups.AgeGroupID
-                WHERE Regions.RegionName = ? AND AgeGroups.AgeGroupCode BETWEEN ? AND ?
-                GROUP BY AgeGroups.AgeGroup;
-            `;
-
-      const [mortalityData] = await db.execute(mortalityDataQuery, [
-        region,
-        ageGroup.split("-")[0],
-        ageGroup.split("-")[1] || 85,
-      ]);
-      console.log(mortalityData);
-      return res.json({ highDataRegions, mortalityData });
+    try {
+      const [results] = await db.execute(query, [region]);
+      console.log(results);
+      res.json(results);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
     }
-
-    // Return high data regions only if no specific region/age group selected
-    console.log(highDataRegions);
-    return res.json({ highDataRegions });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal Server Error");
-  }
 });
 
 app.listen(port, () => {

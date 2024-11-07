@@ -2,7 +2,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const regionSelectQ2 = document.getElementById("regionSelectQ2");
   const ageGroupSelect = document.getElementById("ageGroupSelect");
   const showDataBtnQ2 = document.getElementById("showDataBtnQ2");
-  const deathRateChartQ2 = document.getElementById("deathRateChartQ2");
 
   let chart;
 
@@ -22,16 +21,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       const data = await response.json();
 
       // Check if the data contains mortality data
-      if (!data.mortalityData || data.mortalityData.length === 0) {
+      if (!data || data.length === 0) {
         console.error("No mortality data found.");
         alert("No data found for the selected region and age group.");
         return;
       }
 
-      const labels = data.mortalityData.map((row) => row.AgeGroup);
-      const dataValues = data.mortalityData.map((row) =>
-        Number(row.TotalMortalityCount)
-      ); // Convert string to number
+      const regionName = data.map((item) => item.RegionName);
+      const dataValues = data.map((item) => item.TotalMortality);
 
       // Chart.js code
       if (chart) {
@@ -42,13 +39,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       chart = new Chart(ctx, {
         type: "bar",
         data: {
-          labels: labels,
+          labels: regionName,
           datasets: [
             {
               label: "Total Mortality Count",
               data: dataValues,
-              backgroundColor: "rgba(75, 192, 192, 0.2)",
-              borderColor: "rgba(75, 192, 192, 1)",
+              backgroundColor: regionName.map((region) =>
+                region === selectedRegion
+                  ? "rgba(255, 99, 132, 0.2)"
+                  : "rgba(75, 192, 192, 0.2)"
+              ),
+              borderColor: regionName.map((region) =>
+                region === selectedRegion
+                  ? "rgba(255, 99, 132, 1)"
+                  : "rgba(75, 192, 192, 1)"
+              ),
               borderWidth: 1,
             },
           ],
