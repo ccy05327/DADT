@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const selectedAgeGroup = ageGroupSelect.value;
 
     if (!selectedRegion || !selectedAgeGroup) {
-      alert("Please select both a high-data region and an age group.");
+      alert("Please select both a region and an age group.");
       return;
     }
 
@@ -20,15 +20,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
       const data = await response.json();
 
-      // Check if the data contains mortality data
-      if (!data || data.length === 0) {
-        console.error("No mortality data found.");
-        alert("No data found for the selected region and age group.");
-        return;
-      }
-
       const regionName = data.map((item) => item.RegionName);
       const dataValues = data.map((item) => item.TotalMortality);
+
+      if (regionName.length === 0 || dataValues.length === 0) {
+        document.getElementById("noDataMessage").style.display = "block";
+        return;
+      } else {
+        document.getElementById("noDataMessage").style.display = "none";
+      }
 
       // Chart.js code
       if (chart) {
@@ -74,4 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Fetch the regions on page load
   fetchRegions();
+
+  // Initial setup for the no data message block
+  document.getElementById("noDataMessage").style.display = "none";
 });
