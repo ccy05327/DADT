@@ -28,11 +28,25 @@ app.get("/", async (req, res) => {
     const [countries] = await db.query(
       "SELECT DISTINCT CountryName FROM Countries"
     );
+    const [Q4countries] = await db.query(
+      "SELECT c.CountryName, COUNT(DISTINCT hs.Year) AS YearCoverage \
+      FROM Countries c \
+      JOIN HealthStatistics hs ON c.CountryID = hs.CountryID \
+      GROUP BY c.CountryName \
+      ORDER BY YearCoverage DESC \
+      LIMIT 15"
+    );
     const [ageGroups] = await db.query(
       "SELECT DISTINCT AgeGroup FROM AgeGroups"
     );
     const [sexOptions] = await db.query("SELECT DISTINCT Sex FROM Sex");
-    res.render("home", { regions, countries, ageGroups, sexOptions });
+    res.render("home", {
+      regions,
+      countries,
+      ageGroups,
+      sexOptions,
+      Q4countries,
+    });
     // res.render("chart");
   } catch (error) {
     console.error(error);
@@ -187,25 +201,58 @@ app.get("/api/mortality-gender-differences", async (req, res) => {
   console.log(region);
   const query = `
     SELECT 
-      R.RegionName,
-      S.SexID,
-      SUM(H.Number) AS TotalMortality,
-      AVG(H.DeathRate) AS AvgDeathRate
+        r.RegionName,
+        s.Sex,
+        SUM(h.Number) AS TotalMortality
     FROM 
-        HealthStatistics H
+        HealthStatistics h
     JOIN 
-        Countries C ON H.CountryID = C.CountryID
+        Countries c ON h.CountryID = c.CountryID
     JOIN 
-        Regions R ON C.RegionID = R.RegionID
+        Regions r ON c.RegionID = r.RegionID
+    JOIN 
+        Sex s ON h.SexID = s.SexID
     WHERE 
-        H.DeathRate IS NOT NULL OR H.Number IS NOT NULL
+        h.Number IS NOT NULL
+        AND s.Sex IN ('Male', 'Female', 'All')
+        AND r.RegionName = '${region}'
     GROUP BY 
-        R.RegionName, S.SexID
+        r.RegionName, s.Sex
     ORDER BY 
-        R.RegionName, S.SexID;
+        s.Sex;
   `;
   try {
     const [results] = await db.execute(query);
+    console.log(results);
+    res.json(results);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// question 4: yearly mortality trend by country
+app.get("/api/yearly-mortality-by-country", async (req, res) => {
+  const country = req.query.country;
+  console.log(country);
+  const query = `
+    SELECT 
+        c.CountryName, 
+        hs.Year, 
+        SUM(hs.Number) AS TotalMortality
+    FROM 
+        HealthStatistics hs
+    JOIN 
+        Countries c ON hs.CountryID = c.CountryID
+    WHERE 
+        c.CountryName = '${country}'
+    GROUP BY 
+        c.CountryName, hs.Year
+    ORDER BY 
+        c.CountryName, hs.Year;
+  `;
+  try {
+    const [results] = await db.execute(query, [country]);
     console.log(results);
     res.json(results);
   } catch (error) {
