@@ -1,30 +1,50 @@
+DROP TABLE IF EXISTS Temp;
+
 CREATE TABLE Temp (
-    RegionCode VARCHAR(50),
+    RegionCode VARCHAR(10),
     RegionName VARCHAR(100),
-    CountryCode VARCHAR(50),
+    CountryCode VARCHAR(10),
     CountryName VARCHAR(100),
-    Year YEAR,
-    Sex VARCHAR(10),
+    Year INT,
+    Sex VARCHAR(50),
     AgeGroup VARCHAR(50),
-    Number INT,
-    PercentageOfCauseSpecificDeaths DECIMAL(5,2),
-    AgeStandardizedDeathRate DECIMAL(5,2),
-    DeathRate DECIMAL(5,2)
+    AgeGroupCode VARCHAR(100),
+    Number FLOAT,
+    PercentageOfCauseSpecificDeaths FLOAT,
+    AgeStandardizedDeathRate FLOAT,
+    DeathRate FLOAT
 );
 
 D:\GitHub\DADT\data\test.csv
 D:\GitHub\DADT\data\WHOMortalityDatabase_Map_Noncommunicable_Diseases.csv
 
+-- 2024/10/15 workable but NULL for all PercentageOfCauseSpecificDeaths, AgeStandardizedDeathRate, and DeathRate --
 LOAD DATA INFILE 'D:\GitHub\DADT\data\WHOMortalityDatabase_Map_Noncommunicable_Diseases.csv'
 INTO TABLE Temp
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"'
 IGNORE 1 LINES
-(RegionCode, RegionName, CountryCode, CountryName, Year, Sex, @dummy, AgeGroup, Number, @PercentageOfCauseSpecificDeaths, @AgeStandardizedDeathRate, @DeathRate)
+(RegionCode, RegionName, CountryCode, CountryName, Year, Sex, AgeGroupCode, AgeGroup, Number, @PercentageOfCauseSpecificDeaths, @AgeStandardizedDeathRate, @DeathRate)
 SET
     PercentageOfCauseSpecificDeaths = NULLIF(@PercentageOfCauseSpecificDeaths, ''),
     AgeStandardizedDeathRate = NULLIF(@AgeStandardizedDeathRate, ''),
     DeathRate = NULLIF(@DeathRate, '');
+
+-- 2024/11/20 workable after modifying all the properties for Temp to VARCHAR --
+/home/coder/project/1-50,000.csv
+LOAD DATA INFILE 'D:\GitHub\DADT\data\WHOMortalityDatabase_Map_Noncommunicable_Diseases.csv'
+INTO TABLE Temp
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"' 
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(RegionCode, RegionName, CountryCode, CountryName, Year, Sex, @AgeGroupCode, AgeGroup, @Number, @PercentageOfCauseSpecificDeaths, @AgeStandardizedDeathRate, @DeathRate)
+SET
+    AgeGroupCode = @AgeGroupCode,
+    Number = NULLIF(TRIM(@Number), ''),
+    PercentageOfCauseSpecificDeaths = NULLIF(TRIM(@PercentageOfCauseSpecificDeaths), ''),
+    AgeStandardizedDeathRate = NULLIF(TRIM(@AgeStandardizedDeathRate), ''),
+    DeathRate = NULLIF(TRIM(@DeathRate), '');
 
 
 CREATE TABLE Regions (
@@ -55,17 +75,18 @@ CREATE TABLE Sex (
 CREATE TABLE HealthStatistics (
     StatID INT AUTO_INCREMENT PRIMARY KEY,
     CountryID INT,
-    Year YEAR NOT NULL,
+    Year INT,
     AgeGroupID INT,
     SexID INT,
-    Number INT,
-    PercentageOfCauseSpecificDeaths DECIMAL(5,2),
-    AgeStandardizedDeathRate DECIMAL(5,2),
-    DeathRate DECIMAL(5,2),
+    Number FLOAT,
+    PercentageOfCauseSpecificDeaths FLOAT,
+    AgeStandardizedDeathRate FLOAT,
+    DeathRate FLOAT,
     FOREIGN KEY (CountryID) REFERENCES Countries(CountryID),
     FOREIGN KEY (AgeGroupID) REFERENCES AgeGroups(AgeGroupID),
     FOREIGN KEY (SexID) REFERENCES Sex(SexID)
 );
+
 
 INSERT INTO Regions (RegionCode, RegionName)
 SELECT DISTINCT RegionCode, RegionName
@@ -75,8 +96,8 @@ INSERT INTO Countries (CountryCode, CountryName, RegionID)
 SELECT DISTINCT CountryCode, CountryName, (SELECT RegionID FROM Regions WHERE RegionCode = Temp.RegionCode)
 FROM Temp;
 
-INSERT INTO AgeGroups (AgeGroup)
-SELECT DISTINCT AgeGroup
+INSERT INTO AgeGroups (AgeGroup, AgeGroupCode)
+SELECT DISTINCT AgeGroup, AgeGroupCode
 FROM Temp;
 
 INSERT INTO Sex (Sex)
@@ -91,15 +112,3 @@ SELECT
     (SELECT SexID FROM Sex WHERE Sex = Temp.Sex),
     Number, PercentageOfCauseSpecificDeaths, AgeStandardizedDeathRate, DeathRate
 FROM Temp;
-
-
-
-
-
-
-
-
-
-
-
-
