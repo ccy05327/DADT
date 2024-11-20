@@ -34,19 +34,12 @@ app.get("/", async (req, res) => {
       JOIN HealthStatistics hs ON c.CountryID = hs.CountryID \
       GROUP BY c.CountryName \
       ORDER BY YearCoverage DESC \
-      LIMIT 15"
-    );
+      LIMIT 15");
     const [ageGroups] = await db.query(
       "SELECT DISTINCT AgeGroup FROM AgeGroups"
     );
     const [sexOptions] = await db.query("SELECT DISTINCT Sex FROM Sex");
-    res.render("home", {
-      regions,
-      countries,
-      ageGroups,
-      sexOptions,
-      Q4countries,
-    });
+    res.render("home", { regions, countries, ageGroups, sexOptions, Q4countries });
     // res.render("chart");
   } catch (error) {
     console.error(error);
@@ -120,6 +113,7 @@ app.get("/api/mortality-by-age-group-region", async (req, res) => {
   }
 });
 
+
 // question 2: mortality by age group in regions (highlighted)
 app.get("/api/mortality-by-age-group-in-regions", async (req, res) => {
   const { region, ageGroup } = req.query;
@@ -152,15 +146,16 @@ app.get("/api/mortality-by-age-group-in-regions", async (req, res) => {
   const query = `
     SELECT 
         CASE 
-            WHEN ag.AgeGroupCode BETWEEN 0 AND 9 THEN '0-9'
-            WHEN ag.AgeGroupCode BETWEEN 10 AND 19 THEN '10-19'
-            WHEN ag.AgeGroupCode BETWEEN 20 AND 29 THEN '20-29'
-            WHEN ag.AgeGroupCode BETWEEN 30 AND 39 THEN '30-39'
-            WHEN ag.AgeGroupCode BETWEEN 40 AND 49 THEN '40-49'
-            WHEN ag.AgeGroupCode BETWEEN 50 AND 59 THEN '50-59'
-            WHEN ag.AgeGroupCode BETWEEN 60 AND 69 THEN '60-69'
-            WHEN ag.AgeGroupCode BETWEEN 70 AND 79 THEN '70-79'
-            ELSE '80+'
+            WHEN ag.AgeGroup IN ('[0]') THEN '0-9'
+            WHEN ag.AgeGroup IN ('[1-4]', '[5-9]') THEN '0-9'
+            WHEN ag.AgeGroup IN ('[10-14]', '[15-19]') THEN '10-19'
+            WHEN ag.AgeGroup IN ('[20-24]', '[25-29]') THEN '20-29'
+            WHEN ag.AgeGroup IN ('[30-34]', '[35-39]') THEN '30-39'
+            WHEN ag.AgeGroup IN ('[40-44]', '[45-49]') THEN '40-49'
+            WHEN ag.AgeGroup IN ('[50-54]', '[55-59]') THEN '50-59'
+            WHEN ag.AgeGroup IN ('[60-64]', '[65-69]') THEN '60-69'
+            WHEN ag.AgeGroup IN ('[70-74]', '[75-79]') THEN '70-79'
+            WHEN ag.AgeGroup IN ('[80-84]', '[85+]') THEN '80+'
         END AS AgeRange,
         r.RegionName,
         SUM(hs.Number) AS TotalMortality
@@ -170,20 +165,32 @@ app.get("/api/mortality-by-age-group-in-regions", async (req, res) => {
     JOIN Regions r ON c.RegionID = r.RegionID
     WHERE ag.AgeGroup NOT IN ('[All]', '[Unknown]')
     AND (
-      CASE 
-          WHEN ag.AgeGroupCode BETWEEN 0 AND 9 THEN '0-9'
-          WHEN ag.AgeGroupCode BETWEEN 10 AND 19 THEN '10-19'
-          WHEN ag.AgeGroupCode BETWEEN 20 AND 29 THEN '20-29'
-          WHEN ag.AgeGroupCode BETWEEN 30 AND 39 THEN '30-39'
-          WHEN ag.AgeGroupCode BETWEEN 40 AND 49 THEN '40-49'
-          WHEN ag.AgeGroupCode BETWEEN 50 AND 59 THEN '50-59'
-          WHEN ag.AgeGroupCode BETWEEN 60 AND 69 THEN '60-69'
-          WHEN ag.AgeGroupCode BETWEEN 70 AND 79 THEN '70-79'
-          ELSE '80+'
-      END = '${ageGroup}'
-  )  -- Replace '?' with user input for filtering
+        CASE 
+            WHEN ag.AgeGroup IN ('[0]') THEN '0-9'
+            WHEN ag.AgeGroup IN ('[1-4]', '[5-9]') THEN '0-9'
+            WHEN ag.AgeGroup IN ('[10-14]', '[15-19]') THEN '10-19'
+            WHEN ag.AgeGroup IN ('[20-24]', '[25-29]') THEN '20-29'
+            WHEN ag.AgeGroup IN ('[30-34]', '[35-39]') THEN '30-39'
+            WHEN ag.AgeGroup IN ('[40-44]', '[45-49]') THEN '40-49'
+            WHEN ag.AgeGroup IN ('[50-54]', '[55-59]') THEN '50-59'
+            WHEN ag.AgeGroup IN ('[60-64]', '[65-69]') THEN '60-69'
+            WHEN ag.AgeGroup IN ('[70-74]', '[75-79]') THEN '70-79'
+            WHEN ag.AgeGroup IN ('[80-84]', '[85+]') THEN '80+'
+        END = '${ageGroup}'  -- Replace with user input for filtering
+    )
     GROUP BY AgeRange, r.RegionName
-    ORDER BY AgeRange ASC, r.RegionName
+    ORDER BY 
+        CASE 
+            WHEN AgeRange = '0-9' THEN 1
+            WHEN AgeRange = '10-19' THEN 2
+            WHEN AgeRange = '20-29' THEN 3
+            WHEN AgeRange = '30-39' THEN 4
+            WHEN AgeRange = '40-49' THEN 5
+            WHEN AgeRange = '50-59' THEN 6
+            WHEN AgeRange = '60-69' THEN 7
+            WHEN AgeRange = '70-79' THEN 8
+            WHEN AgeRange = '80+' THEN 9
+        END ASC, r.RegionName;
   `;
 
   try {
