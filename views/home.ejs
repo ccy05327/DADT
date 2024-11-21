@@ -13,9 +13,9 @@
 <body>
     <h1>Health Statistics Analysis</h1>
 
-    <!-- Question 1: Age-Standardized Death Rates by Region -->
+    <!-- Question 1: Mortality by Region -->
     <section>
-        <h2>1. Age-Standardized Death Rates by Region</h2>
+        <h2>1. Mortality by Region</h2>
         <label for="regionSelectQ1">Select Region:</label>
         <select id="regionSelectQ1">
             <option value="" disabled selected>Select a region</option>
@@ -56,7 +56,8 @@
         </select>
         <button id="showDataBtnQ2">Show Data</button>
         <canvas id="deathRateChartQ2" width="400" height="200"></canvas>
-        <div id="noDataMessage" style="display: none; color: red; text-align: center;">No data from the selected properties</div>
+        <div id="noDataMessage" style="display: none; color: red; text-align: center;">No data from the selected
+            properties</div>
     </section>
 
     <!-- Question 3: Gender Difference in Mortality by Region -->
@@ -85,6 +86,25 @@
             <% Q4countries.forEach(country=> { %>
                 <option value="<%= country.CountryName %>">
                     <%= country.CountryName %>
+                </option>
+                <% }); %>
+        </select>
+        <label for="yearSelectStartQ4">Start Year:</label>
+        <select id="yearSelectStartQ4">
+            <option value="" selected>All Years</option>
+            <% yearOptions.forEach(year=> { %>
+                <option value="<%= year.Year %>">
+                    <%= year.Year %>
+                </option>
+                <% }); %>
+        </select>
+        
+        <label for="yearSelectEndQ4">End Year:</label>
+        <select id="yearSelectEndQ4">
+            <option value="" selected>All Years</option>
+            <% yearOptions.forEach(year=> { %>
+                <option value="<%= year.Year %>">
+                    <%= year.Year %>
                 </option>
                 <% }); %>
         </select>

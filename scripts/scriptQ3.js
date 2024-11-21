@@ -57,7 +57,7 @@ document.addEventListener("click", async () => {
         chart = new Chart(ctx, {
           type: "bar",
           data: {
-            labels: "_", // keep it to just one column
+            labels: [selectedRegion], // keep it to just one column
             datasets: [
               {
                 label: "Male Mortality",

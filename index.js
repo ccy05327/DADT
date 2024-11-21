@@ -34,12 +34,23 @@ app.get("/", async (req, res) => {
       JOIN HealthStatistics hs ON c.CountryID = hs.CountryID \
       GROUP BY c.CountryName \
       ORDER BY YearCoverage DESC \
-      LIMIT 15");
+      LIMIT 15"
+    );
     const [ageGroups] = await db.query(
       "SELECT DISTINCT AgeGroup FROM AgeGroups"
     );
     const [sexOptions] = await db.query("SELECT DISTINCT Sex FROM Sex");
-    res.render("home", { regions, countries, ageGroups, sexOptions, Q4countries });
+    const [yearOptions] = await db.query(
+      "SELECT DISTINCT Year FROM HealthStatistics ORDER BY Year"
+    );
+    res.render("home", {
+      regions,
+      countries,
+      ageGroups,
+      sexOptions,
+      Q4countries,
+      yearOptions,
+    });
     // res.render("chart");
   } catch (error) {
     console.error(error);
@@ -112,7 +123,6 @@ app.get("/api/mortality-by-age-group-region", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
-
 
 // question 2: mortality by age group in regions (highlighted)
 app.get("/api/mortality-by-age-group-in-regions", async (req, res) => {
@@ -242,8 +252,24 @@ app.get("/api/mortality-gender-differences", async (req, res) => {
 // question 4: yearly mortality trend by country
 app.get("/api/yearly-mortality-by-country", async (req, res) => {
   const country = req.query.country;
-  console.log(country);
-  const query = `
+  const startYear = req.query.startYear
+    ? parseInt(req.query.startYear, 10)
+    : undefined;
+  const endYear = req.query.endYear
+    ? parseInt(req.query.endYear, 10)
+    : undefined;
+
+  console.log(req.query);
+  console.log(
+    "Country:",
+    country,
+    "Start Year:",
+    startYear,
+    "End Year:",
+    endYear
+  );
+
+  let query = `
     SELECT 
         c.CountryName, 
         hs.Year, 
@@ -253,14 +279,24 @@ app.get("/api/yearly-mortality-by-country", async (req, res) => {
     JOIN 
         Countries c ON hs.CountryID = c.CountryID
     WHERE 
-        c.CountryName = '${country}'
+        c.CountryName = ?
+        ${startYear ? "AND hs.Year >= ?" : ""}
+        ${endYear ? "AND hs.Year <= ?" : ""}
     GROUP BY 
         c.CountryName, hs.Year
     ORDER BY 
-        c.CountryName, hs.Year;
+        hs.Year;
   `;
+
+  const params = [country];
+  if (startYear) params.push(startYear);
+  if (endYear) params.push(endYear);
+
+  console.log("Executing Query:", query);
+  console.log("With Params:", params);
+
   try {
-    const [results] = await db.execute(query, [country]);
+    const [results] = await db.execute(query, params);
     console.log(results);
     res.json(results);
   } catch (error) {

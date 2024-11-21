@@ -1,26 +1,38 @@
-document.addEventListener("click", async () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const countrySelectQ4 = document.getElementById("countrySelectQ4");
+  const yearSelectStartQ4 = document.getElementById("yearSelectStartQ4");
+  const yearSelectEndQ4 = document.getElementById("yearSelectEndQ4");
   const showDataBtnQ4 = document.getElementById("showDataBtnQ4");
 
   if (countrySelectQ4) {
     const ctx = document.getElementById("deathRateChartQ4").getContext("2d");
-
     let chart;
 
     showDataBtnQ4.addEventListener("click", async () => {
       const country = countrySelectQ4.value;
+      const startYear = yearSelectStartQ4.value || "";
+      const endYear = yearSelectEndQ4.value || "";
+
+      let queryParams = `country=${encodeURIComponent(country)}`;
+      if (startYear)
+        queryParams += `&startYear=${encodeURIComponent(startYear)}`;
+      if (endYear) queryParams += `&endYear=${encodeURIComponent(endYear)}`;
 
       if (!country) {
         alert("Q4 | Please select a country.");
         return;
       }
 
+      if (startYear > endYear)
+        alert("The Start Year has to be earlier than End Year.");
+
       try {
         const response = await fetch(
-          `/api/yearly-mortality-by-country?country=${country}`
+          `/api/yearly-mortality-by-country?${queryParams}`
         );
 
         if (!response.ok) {
+          alert("Network response was not ok");
           return;
         }
         const data = await response.json();
