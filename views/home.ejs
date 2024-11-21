@@ -22,66 +22,100 @@
                 </tr>
             </thead>
             <tbody>
+                <!-- Data Completeness and Coverage -->
                 <tr>
-                    <td>Total Records</td>
+                    <td>Total Rows in Database</td>
                     <td>
                         <%= stats.totalRecords %>
                     </td>
                 </tr>
                 <tr>
-                    <td>Total Countries</td>
+                    <td>Percentage of Rows with Missing Mortality Data</td>
                     <td>
-                        <%= stats.totalCountries %>
+                        <%= stats.percentMissingMortality %>%
                     </td>
                 </tr>
                 <tr>
-                    <td>Total Years</td>
+                    <td>Percentage of Rows with Missing Death Rate Data</td>
+                    <td>
+                        <%= stats.percentMissingDeathRate %>%
+                    </td>
+                </tr>
+                <tr>
+                    <td>Countries with Complete Data Across All Years</td>
+                    <td>
+                        <%= stats.countriesWithCompleteData %>
+                    </td>
+                </tr>
+
+                <!-- Time-Based Statistics -->
+                <tr>
+                    <td>Total Years Covered in the Database</td>
                     <td>
                         <%= stats.totalYears %>
                     </td>
                 </tr>
                 <tr>
-                    <td>Total Age Groups</td>
+                    <td>Earliest Year in the Database</td>
                     <td>
-                        <%= stats.totalAgeGroups %>
+                        <%= stats.earliestYear %>
                     </td>
                 </tr>
                 <tr>
-                    <td>Total Sex Categories</td>
+                    <td>Latest Year in the Database</td>
                     <td>
-                        <%= stats.totalSexCategories %>
+                        <%= stats.latestYear %>
                     </td>
                 </tr>
+
+                <!-- Death Rate and Cause-Specific Statistics -->
                 <tr>
-                    <td>Total Mortality</td>
-                    <td>
-                        <%= stats.totalMortality %>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Average Mortality Per Year</td>
-                    <td>
-                        <%= stats.avgMortalityPerYear %>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Maximum Mortality</td>
-                    <td>
-                        <%= stats.maxMortality %>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Minimum Mortality</td>
-                    <td>
-                        <%= stats.minMortality %>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Average Death Rate</td>
+                    <td>Average Death Rate Across All Records</td>
                     <td>
                         <%= stats.avgDeathRate %>
                     </td>
                 </tr>
+                <tr>
+                    <td>Maximum Death Rate Recorded</td>
+                    <td>
+                        <%= stats.maxDeathRate %>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Minimum Death Rate Recorded</td>
+                    <td>
+                        <%= stats.minDeathRate %>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Average Percentage of Cause-Specific Deaths</td>
+                    <td>
+                        <%= stats.avgCauseSpecific %>
+                    </td>
+                </tr>
+                <!-- Geographic Distribution -->
+                <tr>
+                    <td>Region with the Most Mortality Data</td>
+                    <td>
+                        <%= stats.regionWithMostMortalityData %>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Country with the Highest Total Mortality</td>
+                    <td>
+                        <%= stats.countryWithHighestTotalMortality %>
+                    </td>
+                </tr>
+
+                <!-- Geographic Distribution continued -->
+                <tr>
+                    <td>Total Number of Countries</td>
+                    <td>
+                        <%= stats.totalCountries %>
+                    </td>
+                </tr>
+
+                <!-- Death Rate and Cause-Specific Statistics continued -->
                 <tr>
                     <td>Average Death Rate Across All Records</td>
                     <td>
@@ -112,34 +146,34 @@
                         <%= stats.maxCauseSpecific %>
                     </td>
                 </tr>
+
+                <!-- Time-Based Statistics continued -->
                 <tr>
-                    <td>Earliest Year in the Database</td>
+                    <td>Total Number of Years in the Database</td>
                     <td>
-                        <%= stats.earliestYear %>
+                        <%= stats.totalYears %>
+                    </td>
+                </tr>
+
+                <!-- Data Completeness and Coverage continued -->
+                <tr>
+                    <td>Countries with Missing Mortality Data</td>
+                    <td>
+                        <%= stats.percentMissingMortality %>
                     </td>
                 </tr>
                 <tr>
-                    <td>Latest Year in the Database</td>
+                    <td>Countries with Missing Death Rate Data</td>
                     <td>
-                        <%= stats.latestYear %>
+                        <%= stats.percentMissingDeathRate %>
                     </td>
                 </tr>
+
+                <!-- Total Mortality Data -->
                 <tr>
-                    <td>Percentage of Rows with Missing Mortality Data</td>
+                    <td>Total Mortality Records Across All Countries</td>
                     <td>
-                        <%= stats.percentMissingMortality %>%
-                    </td>
-                </tr>
-                <tr>
-                    <td>Percentage of Rows with Missing Death Rate Data</td>
-                    <td>
-                        <%= stats.percentMissingDeathRate %>%
-                    </td>
-                </tr>
-                <tr>
-                    <td>Countries with Complete Data Across All Years</td>
-                    <td>
-                        <%= stats.countriesWithCompleteData %>
+                        <%= stats.totalMortality %>
                     </td>
                 </tr>
                 <tr>
@@ -242,7 +276,7 @@
                 </option>
                 <% }); %>
         </select>
-        
+
         <label for="yearSelectEndQ4">End Year:</label>
         <select id="yearSelectEndQ4">
             <option value="" selected>All Years</option>
