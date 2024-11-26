@@ -1,0 +1,36 @@
+<!-- Question 4: Yearly Mortality by Country -->
+<section>
+    <h2>4. Yearly Mortality by Country</h2>
+    <div>A line chart showing yearly mortality data for the top 15 countries with the most complete data.</div>
+    <div>Users can select a country and filter the data by a custom range of years.</div>
+    <div>Only the top 15 countries that has the most data coverage across years are available </div>
+    <label for="countrySelectQ4">Select Country:</label>
+    <select id="countrySelectQ4">
+        <option value="" disabled selected>Select a country</option>
+        <% Q4countries.forEach(country=> { %>
+            <option value="<%= country.CountryName %>">
+                <%= country.CountryName %>
+            </option>
+            <% }); %>
+    </select>
+    <label for="yearSelectStartQ4">Start Year:</label>
+    <select id="yearSelectStartQ4">
+        <option value="" selected>All Years</option>
+        <% yearOptions.forEach(year=> { %>
+            <option value="<%= year.Year %>">
+                <%= year.Year %>
+            </option>
+            <% }); %>
+    </select>
+    <label for="yearSelectEndQ4">End Year:</label>
+    <select id="yearSelectEndQ4">
+        <option value="" selected>All Years</option>
+        <% yearOptions.forEach(year=> { %>
+            <option value="<%= year.Year %>">
+                <%= year.Year %>
+            </option>
+            <% }); %>
+    </select>
+    <button id="showDataBtnQ4">Show Data</button>
+    <canvas id="deathRateChartQ4" width="400" height="200"></canvas>
+</section>

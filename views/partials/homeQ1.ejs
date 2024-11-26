@@ -1,0 +1,17 @@
+<!-- Question 1: Mortality by Region -->
+<section>
+    <h2>1. Mortality by Region</h2>
+    <div>A bar chart displaying mortality data by age group (0-9, 10-19, etc.) for a selected region.</div>
+    <div>Simply choose a region from the dropdown to view the data.</div>
+    <label for="regionSelectQ1">Select Region:</label>
+    <select id="regionSelectQ1">
+        <option value="" disabled selected>Select a region</option>
+        <% regions.forEach(region=> { %>
+            <option value="<%= region.RegionName %>">
+                <%= region.RegionName %>
+            </option>
+            <% }); %>
+    </select>
+    <button id="showDataBtnQ1">Show Data</button>
+    <canvas id="deathRateChartQ1" width="400" height="200"></canvas>
+</section>
