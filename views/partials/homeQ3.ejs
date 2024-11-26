@@ -1,18 +1,24 @@
 <!-- Question 3: Gender Difference in Mortality by Region -->
 <section>
     <h2>3. Gender Difference in Mortality by Region</h2>
-    <div>A donut chart showing the difference in mortality between males, females, and all individuals for a selected
-        region.</div>
+    <div>A donut chart showing the difference in mortality between males, females, and all individuals for a selected region.</div>
     <div>The data updates based on the region selected.</div>
+
+    <!-- Dropdown for selecting region -->
     <label for="regionSelectQ3">Select Region:</label>
     <select id="regionSelectQ3">
         <option value="" disabled selected>Select a region</option>
-        <% regions.forEach(region=> { %>
+        <% regions.forEach(region => { %>
+            <!-- Populate region options dynamically from the regions array -->
             <option value="<%= region.RegionName %>">
                 <%= region.RegionName %>
             </option>
-            <% }); %>
+        <% }); %>
     </select>
+
+    <!-- Button to trigger data display -->
     <button id="showDataBtnQ3">Show Data</button>
+
+    <!-- Canvas for rendering the donut chart -->
     <canvas id="deathRateChartQ3" width="400" height="200"></canvas>
 </section>

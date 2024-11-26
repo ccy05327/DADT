@@ -11,13 +11,19 @@
 </head>
 
 <body>
+    <header>
+        <img src="/assets/logo.svg" alt="Logo" class="logo" />
+    </header>
+
     <h1>Health Statistics Analysis</h1>
-    <!-- Introduction -->
+    <!-- Introduction to the dashboard -->
     <section>
+        <div></div>
         <div>This dashboard contains 22 key statistics that provide insights into global mortality data.</div>
-        <div>There are four interactive charts after that allows exploration within the data.</div>
+        <div>There are four interactive charts after that allow exploration within the data.</div>
     </section>
-    <!-- Basic Info Dashboard -->
+
+    <!-- Basic Info Dashboard with key statistics -->
     <section id="statistics">
         <h2>Overview</h2>
         <table border="1" cellspacing="0" cellpadding="10">
@@ -28,7 +34,7 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Data Completeness and Coverage -->
+                <!-- Data Completeness and Coverage statistics -->
                 <tr>
                     <td>Total Rows in Database</td>
                     <td>
@@ -99,6 +105,7 @@
                         <%= stats.avgCauseSpecific %>
                     </td>
                 </tr>
+
                 <!-- Geographic Distribution -->
                 <tr>
                     <td>Region with the Most Mortality Data</td>
@@ -113,7 +120,7 @@
                     </td>
                 </tr>
 
-                <!-- Geographic Distribution continued -->
+                <!-- Total Number of Countries -->
                 <tr>
                     <td>Total Number of Countries</td>
                     <td>
@@ -198,15 +205,17 @@
         </table>
     </section>
 
-    <!-- Question 1: Mortality by Region -->
+    <!-- Include interactive charts for each question -->
     <%- include("partials/homeQ1") %>
-    <!-- Question 2: Mortality by Age Group in Regions -->
+    <!-- Mortality by Region -->
     <%- include("partials/homeQ2") %>
-    <!-- Question 3: Gender Difference in Mortality by Region -->
+    <!-- Mortality by Age Group in Regions -->
     <%- include("partials/homeQ3") %>
-    <!-- Question 4: Yearly Mortality by Country -->
+    <!-- Gender Difference in Mortality by Region -->
     <%- include("partials/homeQ4") %>
+    <!-- Yearly Mortality by Country -->
 
+    <!-- Scripts for handling chart data -->
     <script src="/scripts/scriptQ1.js"></script>
     <script src="/scripts/scriptQ2.js"></script>
     <script src="/scripts/scriptQ3.js"></script>

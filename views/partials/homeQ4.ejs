@@ -3,34 +3,47 @@
     <h2>4. Yearly Mortality by Country</h2>
     <div>A line chart showing yearly mortality data for the top 15 countries with the most complete data.</div>
     <div>Users can select a country and filter the data by a custom range of years.</div>
-    <div>Only the top 15 countries that has the most data coverage across years are available </div>
+    <div>Only the top 15 countries that have the most data coverage across years are available.</div>
+
+    <!-- Dropdown for selecting a country -->
     <label for="countrySelectQ4">Select Country:</label>
     <select id="countrySelectQ4">
         <option value="" disabled selected>Select a country</option>
-        <% Q4countries.forEach(country=> { %>
+        <% Q4countries.forEach(country => { %>
+            <!-- Populate country options dynamically from the Q4countries array -->
             <option value="<%= country.CountryName %>">
                 <%= country.CountryName %>
             </option>
-            <% }); %>
+        <% }); %>
     </select>
+
+    <!-- Dropdown for selecting the start year -->
     <label for="yearSelectStartQ4">Start Year:</label>
     <select id="yearSelectStartQ4">
         <option value="" selected>All Years</option>
-        <% yearOptions.forEach(year=> { %>
+        <% yearOptions.forEach(year => { %>
+            <!-- Populate year options dynamically from the yearOptions array -->
             <option value="<%= year.Year %>">
                 <%= year.Year %>
             </option>
-            <% }); %>
+        <% }); %>
     </select>
+
+    <!-- Dropdown for selecting the end year -->
     <label for="yearSelectEndQ4">End Year:</label>
     <select id="yearSelectEndQ4">
         <option value="" selected>All Years</option>
-        <% yearOptions.forEach(year=> { %>
+        <% yearOptions.forEach(year => { %>
+            <!-- Populate year options dynamically from the yearOptions array -->
             <option value="<%= year.Year %>">
                 <%= year.Year %>
             </option>
-            <% }); %>
+        <% }); %>
     </select>
+
+    <!-- Button to trigger data display -->
     <button id="showDataBtnQ4">Show Data</button>
+
+    <!-- Canvas for rendering the line chart -->
     <canvas id="deathRateChartQ4" width="400" height="200"></canvas>
 </section>

@@ -12,24 +12,15 @@ const db = mysql.createPool({
 });
 
 // question 1: mortality by age group by region
-app.get("/api/mortality-by-age-group-region", async (req, res) => {
-  const selectedRegion = req.query.region;
-  console.log(selectedRegion);
+app.get("/", async (req, res) => {
+  const selectedRegion = req.query.region; // Get region from query params
+  console.log(selectedRegion); // Log the selected region
   if (!selectedRegion) {
-    return res.status(400).json({ error: "No region selected." });
+    return res.status(400).json({ error: "No region selected." }); // Handle missing region
   }
 
-  // workable original data
-  // const query = `
-  //     SELECT AgeGroups.AgeGroup, SUM(HealthStatistics.Number) AS TotalMortalityCount
-  //     FROM HealthStatistics
-  //     JOIN Countries ON HealthStatistics.CountryID = Countries.CountryID
-  //     JOIN Regions ON Countries.RegionID = Regions.RegionID
-  //     JOIN AgeGroups ON HealthStatistics.AgeGroupID = AgeGroups.AgeGroupID
-  //     WHERE Regions.RegionName = ? AND AgeGroups.AgeGroup <> '[All]' AND AgeGroups.AgeGroup <> '[Unknown]'
-  //     GROUP BY AgeGroups.AgeGroup
-  // `;
-
+  // SQL query to group age ranges and calculate total mortality for the selected region
+  // Reference: Query structure assisted by ChatGPT
   const query = `
     SELECT 
         CASE 
@@ -43,16 +34,16 @@ app.get("/api/mortality-by-age-group-region", async (req, res) => {
             WHEN AgeGroups.AgeGroup IN ('[60-64]', '[65-69]') THEN '60-69'
             WHEN AgeGroups.AgeGroup IN ('[70-74]', '[75-79]') THEN '70-79'
             WHEN AgeGroups.AgeGroup IN ('[80-84]', '[85+]') THEN '80+'
-        END AS AgeRange,
-        SUM(HealthStatistics.Number) AS TotalMortalityCount
+        END AS AgeRange -- Map specific age groups to broader ranges
+        , SUM(HealthStatistics.Number) AS TotalMortalityCount -- Sum mortality numbers
     FROM HealthStatistics
-    JOIN Countries ON HealthStatistics.CountryID = Countries.CountryID
-    JOIN Regions ON Countries.RegionID = Regions.RegionID
-    JOIN AgeGroups ON HealthStatistics.AgeGroupID = AgeGroups.AgeGroupID
-    WHERE Regions.RegionName = '${selectedRegion}'
-      AND AgeGroups.AgeGroup <> '[All]'
-      AND AgeGroups.AgeGroup <> '[Unknown]'
-    GROUP BY AgeRange
+    JOIN Countries ON HealthStatistics.CountryID = Countries.CountryID -- Link countries
+    JOIN Regions ON Countries.RegionID = Regions.RegionID -- Link regions
+    JOIN AgeGroups ON HealthStatistics.AgeGroupID = AgeGroups.AgeGroupID -- Link age groups
+    WHERE Regions.RegionName = '${selectedRegion}' -- Filter by selected region
+      AND AgeGroups.AgeGroup <> '[All]' -- Exclude summary data
+      AND AgeGroups.AgeGroup <> '[Unknown]' -- Exclude unknown groups
+    GROUP BY AgeRange -- Group results by age range
     ORDER BY 
         CASE 
             WHEN AgeRange = '0-9' THEN 1
@@ -64,16 +55,16 @@ app.get("/api/mortality-by-age-group-region", async (req, res) => {
             WHEN AgeRange = '60-69' THEN 7
             WHEN AgeRange = '70-79' THEN 8
             WHEN AgeRange = '80+' THEN 9
-        END;
-`;
+        END; -- Ensure age ranges are ordered logically
+  `;
 
   try {
-    const [results] = await db.execute(query, [selectedRegion]);
-    console.log(results);
-    res.json(results);
+    const [results] = await db.execute(query, [selectedRegion]); // Execute the query
+    console.log(results); // Log query results
+    res.json(results); // Send results as JSON
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal Server Error");
+    console.error(error); // Log errors
+    res.status(500).send("Internal Server Error"); // Handle server errors
   }
 });
 

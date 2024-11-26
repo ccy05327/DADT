@@ -3,15 +3,20 @@
     <h2>2. Mortality by Age Group in Regions</h2>
     <div>This bar chart allows you to explore mortality rates by age group across regions.</div>
     <div>Select an age group and highlight a region to compare.</div>
+
+    <!-- Dropdown for selecting region to highlight -->
     <label for="regionSelectQ2">Select a Region to Highlight:</label>
     <select id="regionSelectQ2">
         <option value="" disabled selected>Select a region</option>
-        <% regions.forEach(region=> { %>
+        <% regions.forEach(region => { %>
+            <!-- Populate region options dynamically from the regions array -->
             <option value="<%= region.RegionName %>">
                 <%= region.RegionName %>
             </option>
-            <% }); %>
+        <% }); %>
     </select>
+
+    <!-- Dropdown for selecting age group -->
     <label for="ageGroupSelect">Select Age Group:</label>
     <select id="ageGroupSelect">
         <option value="" disabled selected>Select an age group</option>
@@ -25,8 +30,15 @@
         <option value="70-79">70-79</option>
         <option value="80+">80+</option>
     </select>
+
+    <!-- Button to trigger data display -->
     <button id="showDataBtnQ2">Show Data</button>
+
+    <!-- Canvas for rendering the mortality chart -->
     <canvas id="deathRateChartQ2" width="400" height="200"></canvas>
-    <div id="noDataMessage" style="display: none; color: red; text-align: center;">No data from the selected
-        properties</div>
+
+    <!-- Message to show if no data is available -->
+    <div id="noDataMessage" style="display: none; color: red; text-align: center;">
+        No data from the selected properties
+    </div>
 </section>

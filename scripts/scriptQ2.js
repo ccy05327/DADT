@@ -1,36 +1,40 @@
+// Wait for the DOM to fully load before executing scripts
 document.addEventListener("DOMContentLoaded", async () => {
-  const regionSelectQ2 = document.getElementById("regionSelectQ2");
-  const ageGroupSelect = document.getElementById("ageGroupSelect");
-  const showDataBtnQ2 = document.getElementById("showDataBtnQ2");
+  const regionSelectQ2 = document.getElementById("regionSelectQ2"); // Dropdown for region selection
+  const ageGroupSelect = document.getElementById("ageGroupSelect"); // Dropdown for age group selection
+  const showDataBtnQ2 = document.getElementById("showDataBtnQ2"); // Button to fetch and display data
 
   if (regionSelectQ2 && ageGroupSelect) {
-    const ctx = document.getElementById("deathRateChartQ2").getContext("2d");
+    const ctx = document.getElementById("deathRateChartQ2").getContext("2d"); // Canvas context for Chart.js
 
-    let chart;
+    let chart; // Variable to store the Chart.js instance
 
+    // Add event listener to handle button clicks for data fetching
     showDataBtnQ2.addEventListener("click", async () => {
-      const selectedRegion = regionSelectQ2.value;
-      const selectedAgeGroup = ageGroupSelect.value;
+      const selectedRegion = regionSelectQ2.value; // Get the selected region
+      const selectedAgeGroup = ageGroupSelect.value; // Get the selected age group
 
       if (!selectedRegion || !selectedAgeGroup) {
-        alert("Q2 | Please select both a region and an age group.");
+        alert("Q2 | Please select both a region and an age group."); // Alert if selections are incomplete
         return;
       }
 
       try {
+        // Fetch mortality data based on selected region and age group
         const response = await fetch(
           `/api/mortality-by-age-group-in-regions?region=${selectedRegion}&ageGroup=${selectedAgeGroup}`
         );
 
         if (!response.ok) {
-          return;
+          return; // Exit if the response is not successful
         }
 
         const data = await response.json();
 
-        const regionName = data.map((item) => item.RegionName);
-        const dataValues = data.map((item) => item.TotalMortality);
+        const regionName = data.map((item) => item.RegionName); // Extract region names
+        const dataValues = data.map((item) => item.TotalMortality); // Extract mortality counts
 
+        // Show or hide the "no data" message based on the response
         if (regionName.length === 0 || dataValues.length === 0) {
           document.getElementById("noDataMessage").style.display = "block";
           return;
@@ -38,64 +42,70 @@ document.addEventListener("DOMContentLoaded", async () => {
           document.getElementById("noDataMessage").style.display = "none";
         }
 
-        // if (chart) {
-        //   chart.destroy(); // destroy previous chart if exists
-        // }
+        // Destroy the previous chart if it exists
+        if (chart) {
+          chart.destroy();
+        }
 
+        // Create a new bar chart using Chart.js
         chart = new Chart(ctx, {
-          type: "bar",
+          type: "bar", // Bar chart for visualizing data
           data: {
-            labels: regionName,
+            labels: regionName, // X-axis labels (region names)
             datasets: [
               {
-                label: "Total Mortality Count",
-                data: dataValues,
-                backgroundColor: regionName.map((region) =>
-                  region === selectedRegion
-                    ? "rgba(255, 99, 132, 0.2)"
-                    : "rgba(75, 192, 192, 0.2)"
+                label: "Total Mortality Count", // Legend label
+                data: dataValues, // Y-axis data (mortality counts)
+                backgroundColor: regionName.map(
+                  (region) =>
+                    region === selectedRegion
+                      ? "rgba(255, 99, 132, 0.5)" // Highlight selected region in red
+                      : "rgba(75, 192, 192, 0.5)" // Default color for other regions
                 ),
-                borderColor: regionName.map((region) =>
-                  region === selectedRegion
-                    ? "rgba(255, 99, 132, 1)"
-                    : "rgba(75, 192, 192, 1)"
+                borderColor: regionName.map(
+                  (region) =>
+                    region === selectedRegion
+                      ? "rgba(255, 99, 132, 1)" // Highlight border color for the selected region
+                      : "rgba(75, 192, 192, 1)" // Default border color for other regions
                 ),
-                borderWidth: 1,
+                borderWidth: 1, // Bar border width
               },
             ],
           },
           options: {
             scales: {
               y: {
-                beginAtZero: true,
+                beginAtZero: true, // Y-axis starts at zero
               },
             },
           },
         });
       } catch (error) {
-        console.error(error);
+        console.error(error); // Log errors to the console
         alert(
           "Q2 | An error occurred fetching data: " +
             error +
             selectedRegion +
             selectedAgeGroup
-        );
+        ); // Alert for errors
       }
     });
 
+    // Destroy the chart when the region selection changes
     regionSelectQ2.addEventListener("change", async () => {
       if (chart) {
         chart.destroy();
       }
     });
 
+    // Destroy the chart when the age group selection changes
     ageGroupSelect.addEventListener("change", async () => {
       if (chart) {
         chart.destroy();
       }
     });
 
-    // Initial setup for the no data message block
+    // Hide the "no data" message initially
     document.getElementById("noDataMessage").style.display = "none";
   }
 });
