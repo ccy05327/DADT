@@ -1,3 +1,5 @@
+CREATE DATABASE WHO;
+
 DROP TABLE IF EXISTS Temp;
 
 CREATE TABLE Temp (
@@ -38,7 +40,8 @@ FIELDS TERMINATED BY ','
 ENCLOSED BY '"' 
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(RegionCode, RegionName, CountryCode, CountryName, Year, Sex, @AgeGroupCode, AgeGroup, @Number, @PercentageOfCauseSpecificDeaths, @AgeStandardizedDeathRate, @DeathRate)
+(RegionCode, RegionName, CountryCode, CountryName, Year, Sex, @AgeGroupCode, AgeGroup, @Number, \
+@PercentageOfCauseSpecificDeaths, @AgeStandardizedDeathRate, @DeathRate)
 SET
     AgeGroupCode = @AgeGroupCode,
     Number = NULLIF(TRIM(@Number), ''),
@@ -93,7 +96,8 @@ SELECT DISTINCT RegionCode, RegionName
 FROM Temp;
 
 INSERT INTO Countries (CountryCode, CountryName, RegionID)
-SELECT DISTINCT CountryCode, CountryName, (SELECT RegionID FROM Regions WHERE RegionCode = Temp.RegionCode)
+SELECT DISTINCT CountryCode, CountryName, 
+   (SELECT RegionID FROM Regions WHERE RegionCode = Temp.RegionCode)
 FROM Temp;
 
 INSERT INTO AgeGroups (AgeGroup, AgeGroupCode)
@@ -104,7 +108,8 @@ INSERT INTO Sex (Sex)
 SELECT DISTINCT Sex
 FROM Temp;
 
-INSERT INTO HealthStatistics (CountryID, Year, AgeGroupID, SexID, Number, PercentageOfCauseSpecificDeaths, AgeStandardizedDeathRate, DeathRate)
+INSERT INTO HealthStatistics (CountryID, Year, AgeGroupID, 
+SexID, Number, PercentageOfCauseSpecificDeaths, AgeStandardizedDeathRate, DeathRate)
 SELECT 
     (SELECT CountryID FROM Countries WHERE CountryCode = Temp.CountryCode),
     Year,
@@ -112,3 +117,16 @@ SELECT
     (SELECT SexID FROM Sex WHERE Sex = Temp.Sex),
     Number, PercentageOfCauseSpecificDeaths, AgeStandardizedDeathRate, DeathRate
 FROM Temp;
+
+SELECT
+c.CountryName,
+COUNT(DISTINCT hs.Year) AS YearCoverage
+FROM
+Countries c
+JOIN
+HealthStatistics hs ON c.CountryID = hs.CountryID
+GROUP BY
+c.CountryName
+ORDER BY
+YearCoverage DESC
+LIMIT 15; -- Limit to top 15 countries with the most coverage

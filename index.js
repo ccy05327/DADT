@@ -36,7 +36,9 @@ app.use("/api/mortality-by-age-group-in-regions", require("./routes/indexQ2"));
 app.use("/api/mortality-gender-differences", require("./routes/indexQ3"));
 
 // question 4: yearly mortality trend by country
+app.use("/api/yearly-mortality-by-country", require("./routes/indexQ4"));
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
